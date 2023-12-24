@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        #chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            width: 80vw;
+            height: 80vh; /* 80% of viewport height */
+        }
+
+        #chat-box {
+            overflow-y: auto; /* Make the chat box scrollable */
+            padding: 10px;
+            height: calc(100% - 50px); /* Adjusted height to leave space for input */
+        }
+
+        .typing-indicator {
+            text-align: center;
+            font-style: italic;
+            color: #999;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .typing-indicator .dot {
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            background-color: #4285f4;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-30px);
+            }
+        }
+
+        #user-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: none;
+            border-top: 1px solid #ccc;
+            border-radius: 0 0 8px 8px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .user-message {
+            background-color: #5cb85c;
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            float: left;
+            clear: both;
+        }
+
+        .bot-message {
+            background-color: #4285f4;
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            float: right;
+            clear: both;
+        }
+    </style>
+    <title>Simple Chatbot</title>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-box"></div>
+        <div class="typing-indicator" id="typing-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+        <input type="text" id="user-input" placeholder="Type a message...">
+    </div>
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var socket = io();
+
+            const chatBox = document.getElementById('chat-box');
+            const userInput = document.getElementById('user-input');
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.style.display = 'none';
+
+            socket.on('server_message', function(message) {
+                if (message === '[FINISHED]') {
+                    hideTypingIndicator();
+                    userInput.disabled = false;
+                    return;
+                }
+                if (message === '[START]') {
+                    showTypingIndicator();
+                    userInput.disabled = true;
+                    return;
+                }
+                addMessage('bot', message);
+            });
+
+            function addMessage(sender, message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+                messageElement.textContent = message;
+                chatBox.appendChild(messageElement);
+
+                // Scroll to the bottom of the chat box
+                chatBox.scrollTop = chatBox.scrollHeight;
+                if (sender==='user') {
+                    socket.emit('message', message);
+                }
+            }
+
+            function showTypingIndicator() {
+                typingIndicator.style.display = 'block';
+            }
+
+            function hideTypingIndicator() {
+                typingIndicator.style.display = 'none';
+            }
+
+            function processUserInput() {
+                const userMessage = userInput.value.trim();
+                if (userMessage !== '') {
+                    addMessage('user', userMessage);
+                    userInput.value = '';
+                }
+            }
+
+            userInput.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    processUserInput();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

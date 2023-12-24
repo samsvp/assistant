@@ -1,0 +1,5 @@
+chromadb==0.4.21
+deep_translator==1.11.4
+Flask==3.0.0
+Flask_SocketIO==5.3.6
+gpt4all==2.0.2
