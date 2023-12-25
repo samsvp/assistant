@@ -2,6 +2,7 @@
 
 Simple proof of concept chatbot using open-source LLMs which answers queries from a custom text-based database.
 
+https://github.com/samsvp/assistant/assets/50253175/3565c64e-1529-47fe-9861-143fa8b2fa74
 
 ### Running
 Add your `.txt` files inside the `database` folder. Also add their metadata (i.e. tags) inside the `metadata` folder.
